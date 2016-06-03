@@ -275,10 +275,11 @@ class CombinerManager(Manager):
         keys = [key for key in keys if key]
 
         snapshot_key = keys[0]
-        result = self.work_function(
+        timeline = self.work_function(
             self.get_parsed_from_cb(keys[1:]))
-        self.logger.debug('Result - {}'.format(result))
-        self.store_results(result, snapshot_key)
+        self.logger.debug('Result - {}'.format(timeline))
+        timeline = timeline.to_dict()
+        self.store_results(timeline, snapshot_key)
         os.remove(file_name)
         self.logger.info('Removed file {}'.format(file_name))
 
@@ -318,6 +319,5 @@ class CombinerManager(Manager):
 
     def store_results(self, results, snapshot_name):
         key = 'Timeline::{}'.format(snapshot_name)
-        results = json.loads(results)
         doc = {'git_rev': self.git_rev, 'results': results}
         self.store_in_cb(key, doc)
