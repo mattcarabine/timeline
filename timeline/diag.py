@@ -104,7 +104,8 @@ class DiagParser(BasicLogSearcher):
     @BasicLogSearcher.register_search('exited with status')
     def _parse_process_exit(self, messages):
         pat_serv_exit = re.compile(
-            r'Port server .* on node .* exited with status [0-9]+\. Restarting')
+            r'Port server .* on node .* exited with status [0-9]+\. '
+            'Restarting')
         pat_port_serv = re.compile(r'Port server (.*) on node')
         pat_exit_status = re.compile(r'exited with status ([0-9]+)')
         for message in messages:
@@ -219,4 +220,3 @@ class DiagParser(BasicLogSearcher):
                                                               t)
                 self.timeline.add_event(Event(message, 'bucket', descr,
                                               self.timeline.default_node_name))
-

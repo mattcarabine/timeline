@@ -21,4 +21,3 @@ class BabysitterParser(BasicLogSearcher):
                     assertion[0], 'assert', 'Memcached assertion: `{}`'
                     .format(m.group('assert')),
                     self.timeline.default_node_name))
-

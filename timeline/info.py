@@ -1,4 +1,3 @@
-
 import re
 
 from basiclogsearcher import BasicLogSearcher
@@ -25,7 +24,7 @@ class InfoParser(BasicLogSearcher):
                 ))
 
     @BasicLogSearcher.register_search('Local flush is done')
-    def _parse_flush_start(self, flushes):
+    def _parse_flush_finish(self, flushes):
         pat_bucket_flush_end = re.compile(
             r'janitor_agent-(.*)<.*Local flush is done')
         for flush in flushes:
@@ -37,4 +36,3 @@ class InfoParser(BasicLogSearcher):
                     'flush complete for bucket `{}`'.format(bucket),
                     self.timeline.default_node_name
                 ))
-

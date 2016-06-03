@@ -12,7 +12,6 @@ import sys
 import zipfile
 
 
-
 import babysitter
 import cblogparser
 import couchdb
@@ -123,8 +122,8 @@ def parse_zip_file(zip_file):
     for name in ci.namelist():
         # determine a default nodename that can be used when parsing
         # cannot otherwise determine the nodename
-        m = re.search(r'couchbase\.log$', name)
         nodename = extract_nodename(name, 'unnamed_node')
+
         # strip cbcollect_info timestamp from nodename
         nodename = re.sub(r'_[0-9]{8}-[0-9]{6}$', '', nodename)
         timeline.default_node_name = nodename

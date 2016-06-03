@@ -1,5 +1,3 @@
-from collections import OrderedDict
-import json
 import logging
 import multiprocessing
 import os
@@ -12,12 +10,12 @@ import zipfile
 """
 A Manager is an object that creates and manages a daemonised process.
 
-In this case there is a ParseManager which is a daemon which monitors a
+In this case there is a ParserManager which is a daemon which monitors a
 directory and parses all cbcollects which enter the directory, once parsed it
 will give magic bob the key to the parsed result.
 
-The CheckerManager waits for snapshots to be placed into its directory and runs
-the checkers on the parsed blobs referenced in the snapshots.
+The CombinerManager waits for snapshots to be placed into its directory and
+combines the timelines referenced in the snapshots.
 
 Both Managers place their results straight into Couchbase as well as passing
 on any relevant information to other services.
@@ -32,7 +30,7 @@ SLEEP_TIME = 15
 logging.basicConfig(format='%(levelname)s|%(name)s: %(message)s',
                     level=logging.INFO)
 
-# see https://github.com/couchbaselabs/supportal/blob/master/supportal/lib/s3checker/s3checker.py#L343
+
 class Manager(object):
     def __init__(self, directory, suffix, work_function, git_rev):
         self.logger = logging.getLogger('timeline.manager')

@@ -1,4 +1,3 @@
-import datetime
 import re
 
 COUCHBASE_LOG_UUID_REGEX = re.compile(r'{uuid,[\n\r\s]+(?:.*[\n\r\s]+)+?'

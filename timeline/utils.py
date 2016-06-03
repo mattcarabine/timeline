@@ -91,4 +91,3 @@ def extract_nodename(line, default_nodename):
         return default_nodename
 
     return n
-
