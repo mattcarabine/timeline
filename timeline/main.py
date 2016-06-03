@@ -122,11 +122,12 @@ def parse_zip_file(zip_file):
     for name in ci.namelist():
         # determine a default nodename that can be used when parsing
         # cannot otherwise determine the nodename
-        nodename = extract_nodename(name, 'unnamed_node')
+        if not timeline.default_node_name:
+            nodename = extract_nodename(name, 'unnamed_node')
 
-        # strip cbcollect_info timestamp from nodename
-        nodename = re.sub(r'_[0-9]{8}-[0-9]{6}$', '', nodename)
-        timeline.default_node_name = nodename
+            # strip cbcollect_info timestamp from nodename
+            nodename = re.sub(r'_[0-9]{8}-[0-9]{6}$', '', nodename)
+            timeline.default_node_name = nodename
         # determine if the file included in this zip can be parsed
         # by one of the modules. if so, add to tasks.
         logname = os.path.split(name)[-1]
