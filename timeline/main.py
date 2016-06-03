@@ -14,6 +14,7 @@ import zipfile
 
 
 import babysitter
+import cblogparser
 import couchdb
 import debug
 import diag
@@ -23,7 +24,8 @@ import manager
 from utils import extract_nodename, Event
 
 MAX_BUFFER_SIZE = 1048576
-LOG_MODULES = {'ns_server.couchdb.log': couchdb.CouchDBParser,
+LOG_MODULES = {'couchbase.log': cblogparser.CBLogParser,
+               'ns_server.couchdb.log': couchdb.CouchDBParser,
                'diag.log': diag.DiagParser,
                'ns_server.babysitter.log': babysitter.BabysitterParser,
                'ns_server.error.log': error.ErrorParser,
