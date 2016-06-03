@@ -173,7 +173,7 @@ class ParserManager(Manager):
                     continue
 
                 try:
-                    cluster_uuid = timeline.uuid
+                    cluster_uuid = timeline.cluster_uuid
                 except AttributeError:
                     cluster_uuid = '{}_no_cluster'.format(os.path
                                                           .split(file_name)[1])
