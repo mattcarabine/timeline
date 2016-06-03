@@ -3,7 +3,7 @@ export TIMELINE="$(cd $(dirname "$0")/.. && pwd)"
 
 # use pypy if available since timeline is pure python with no deps
 if hash pypy 2>/dev/null; then
-    pypy "$timeline"/timeline/timeline.py $@
+    pypy "$TIMELINE"/timeline/main.py $@
 else
-    exec "$CBSUPPORT"/timeline/timeline.py $@
+    exec "$TIMELINE"/timeline/main.py $@
 fi
