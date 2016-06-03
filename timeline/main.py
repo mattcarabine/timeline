@@ -1,13 +1,17 @@
 from __future__ import print_function
 
 import argparse
-import sys
+import datetime
+from glob import iglob
+import io
+import multiprocessing
 import os
 import re
-from glob import iglob
+import subprocess
+import sys
 import zipfile
-import multiprocessing
-import io
+
+
 
 import babysitter
 import couchdb
@@ -15,7 +19,8 @@ import debug
 import diag
 import error
 import info
-from utils import extract_nodename
+import manager
+from utils import extract_nodename, Event
 
 MAX_BUFFER_SIZE = 1048576
 LOG_MODULES = {'ns_server.couchdb.log': couchdb.CouchDBParser,
@@ -27,12 +32,15 @@ LOG_MODULES = {'ns_server.couchdb.log': couchdb.CouchDBParser,
 
 
 class Timeline(object):
-    def __init__(self, timelines=None):
+    def __init__(self, timelines=None, input_dict=None):
         self.events = []
         self.default_node_name = None
         if timelines:
             self.events.extend(event for timeline in timelines
                                for event in timeline.events)
+        elif input_dict:
+            self.events = [Event(input_dict=event_dict)
+                           for event_dict in input_dict['events']]
 
     def add_event(self, event):
         self.events.append(event)
@@ -44,7 +52,7 @@ class Timeline(object):
         self.events = list(sorted(set(self.events)))
 
     def to_dict(self):
-        return [event.to_dict() for event in self.events]
+        return {'events': [event.to_dict() for event in self.events]}
 
     def __str__(self):
         self.sort()
@@ -78,6 +86,14 @@ def create_timeline(parsed_args):
     return final_timeline
 
 
+def combine_timelines(timeline_dicts):
+    """Used as an entry point for the CombinerManager"""
+    timelines = [Timeline(input_dict=timeline_dict)
+                 for timeline_dict in timeline_dicts]
+    final_timeline = Timeline(timelines=timelines)
+    return final_timeline
+
+
 def parse_zip_file(zip_file):
     timeline = Timeline()
     try:
@@ -97,6 +113,9 @@ def parse_zip_file(zip_file):
         # determine if the file included in this zip can be parsed
         # by one of the modules. if so, add to tasks.
         logname = os.path.split(name)[-1]
+        if logname == 'couchbase.log':
+            timeline.collection_time = datetime.datetime(
+                *ci.getinfo(name).date_time).isoformat()
         try:
             LOG_MODULES[logname](io.BufferedReader(
                 ci.open(name), MAX_BUFFER_SIZE), timeline)
@@ -116,15 +135,14 @@ def multiprocessing_parse_zip_file(zip_file):
 
 
 def parse_arguments(timeline_args):
-    parser = argparse.ArgumentParser(description='Nutshell - a tool to '
-                                                 'summarize and highlight pertinent '
-                                                 'information from Couchbase log files.')
+    parser = argparse.ArgumentParser(description='Timeline - a tool to create'
+                                     'timelines of events using cbcollects')
 
     parser.add_argument('locations', nargs='*', default=None,
                         help='Locations of cbcollects')
     parser.add_argument('--output', choices=['text', 'json'],
                         default='text', help='Output format to use')
-    parser.add_argument('--mode', choices=['parse_only', 'pre_parsed',
+    parser.add_argument('--mode', choices=['parse_only', 'combine',
                                            'default', 'convert_json'],
                         default='default', help='Mode to run nutshell in')
     return parser.parse_args(timeline_args)
@@ -132,7 +150,19 @@ def parse_arguments(timeline_args):
 
 def main():
     parsed_args = parse_arguments(sys.argv[1:])
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    git_rev = subprocess.check_output('cd ' + script_dir +
+                                      '&& git describe --long 2>/dev/null'
+                                      "|| echo 'g'`git rev-parse --short"
+                                      ' HEAD`', shell=True).strip()
     timeline = create_timeline(parsed_args)
+
+    if parsed_args.mode == 'parse_only':
+        manager.ParserManager(parsed_args.locations[0], parse_zip_file,
+                              git_rev)
+    elif parsed_args.mode == 'combine':
+        manager.CombinerManager(parsed_args.locations[0], combine_timelines,
+                                git_rev)
     if parsed_args.output == 'json':
         print(timeline.to_dict())
     else:

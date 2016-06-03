@@ -8,20 +8,26 @@ pat_nodename2 = re.compile(r'([^\s]+@127.0.0.1)')
 
 
 class Event(object):
-    def __init__(self, line, event_type, description, default_node_name,
-                 node_name=None):
-        self.timestamp = extract_time(line)
-        # In the general case it is more convenient to
-        # automatically parse the node name from the line
-        # However in the case of diag, this does not work
-        # all the time as it reports messages from multiple
-        # nodes, not just the node the logs are for.
-        if node_name:
-            self.node_name = node_name
+    def __init__(self, line=None, event_type=None, description=None,
+                 default_node_name=None, node_name=None, input_dict=None):
+        if input_dict:
+            self.timestamp = input_dict['timestamp']
+            self.node_name = input_dict['node_name']
+            self.type = input_dict['type']
+            self.description = input_dict['description']
         else:
-            self.node_name = extract_nodename(line, default_node_name)
-        self.type = event_type
-        self.description = description
+            self.timestamp = extract_time(line)
+            # In the general case it is more convenient to
+            # automatically parse the node name from the line
+            # However in the case of diag, this does not work
+            # all the time as it reports messages from multiple
+            # nodes, not just the node the logs are for.
+            if node_name:
+                self.node_name = node_name
+            else:
+                self.node_name = extract_nodename(line, default_node_name)
+            self.type = event_type
+            self.description = description
         self.node_width = 20
         self.str_format = '{0:<26} {1:^{width}} {2}'
 
