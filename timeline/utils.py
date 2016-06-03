@@ -11,7 +11,7 @@ class Event(object):
     def __init__(self, line=None, event_type=None, description=None,
                  default_node_name=None, node_name=None, input_dict=None):
         if input_dict:
-            self.timestamp = input_dict['timestamp']
+            self.timestamp = parse(input_dict['timestamp'])
             self.node_name = input_dict['node_name']
             self.type = input_dict['type']
             self.description = input_dict['description']
