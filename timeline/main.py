@@ -56,6 +56,22 @@ class Timeline(object):
     def to_dict(self):
         return {'events': [event.to_dict() for event in self.events]}
 
+    def to_html(self):
+        import ansiconv
+        output = """
+            <style>
+              {}
+
+              div.timeline {{
+                font-family: monospace;
+                white-space: pre-wrap;
+                padding: 10px;
+              }}
+            </style>
+            <div class="timeline ansi_fore ansi_back">{}</div>
+            """.format(ansiconv.base_css(), ansiconv.to_html(str(self)))
+        return output
+
     def __str__(self):
         self.sort()
         node_width = max(len(event.node_name) + 4 for event in self.events)
@@ -142,7 +158,7 @@ def parse_arguments(timeline_args):
 
     parser.add_argument('locations', nargs='*', default=None,
                         help='Locations of cbcollects')
-    parser.add_argument('--output', choices=['text', 'json'],
+    parser.add_argument('--output', choices=['text', 'json', 'html'],
                         default='text', help='Output format to use')
     parser.add_argument('--mode', choices=['parse_only', 'combine',
                                            'default', 'convert_json'],
@@ -168,6 +184,8 @@ def main():
     timeline = create_timeline(parsed_args)
     if parsed_args.output == 'json':
         print(timeline.to_dict())
+    elif parsed_args.output == 'html':
+        print(timeline.to_html())
     else:
         print(timeline)
     return 0
