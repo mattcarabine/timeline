@@ -155,7 +155,6 @@ def main():
                                       '&& git describe --long 2>/dev/null'
                                       "|| echo 'g'`git rev-parse --short"
                                       ' HEAD`', shell=True).strip()
-    timeline = create_timeline(parsed_args)
 
     if parsed_args.mode == 'parse_only':
         manager.ParserManager(parsed_args.locations[0], parse_zip_file,
@@ -163,6 +162,8 @@ def main():
     elif parsed_args.mode == 'combine':
         manager.CombinerManager(parsed_args.locations[0], combine_timelines,
                                 git_rev)
+
+    timeline = create_timeline(parsed_args)
     if parsed_args.output == 'json':
         print(timeline.to_dict())
     else:
