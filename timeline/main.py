@@ -61,13 +61,13 @@ class Timeline(object):
             <style>
               {}
 
-              div.timeline {{
+              div.timelinetool {{
                 font-family: monospace;
                 white-space: pre-wrap;
                 padding: 10px;
               }}
             </style>
-            <div class="timeline ansi_fore ansi_back">{}</div>
+            <div class="timelinetool ansi_fore ansi_back">{}</div>
             """.format(ansiconv.base_css(), ansiconv.to_html(str(self)))
         return output
 
