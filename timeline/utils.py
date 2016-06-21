@@ -1,5 +1,6 @@
 import re
 from dateutil.parser import parse
+from dateutil.tz import tzutc
 
 pat_time = re.compile(r'(([0-9]{4}-[0-9]{2}-[0-9]{2}[T ]?[0-9][0-9]*:[0-9]{2}:'
                       '[0-9]{2}\.[0-9]{3})([-+][0-9]{2}:[0-9]{2})?)')
@@ -28,6 +29,17 @@ class Event(object):
                 self.node_name = extract_nodename(line, default_node_name)
             self.type = event_type
             self.description = description
+
+        # It's possible that the timestamp has no offset in it
+        # However, we still want to be able to compare these
+        # timestamps with others which may have offsets in
+        # We could do this conversion in the parsing of the timestamp
+        # but we now have bad timestamps out in the wild so it's
+        # easier to fix it here
+        if not self.timestamp.tzinfo:
+            # Due to no other info, assume it is UTC
+            self.timestamp = self.timestamp.replace(tzinfo=tzutc())
+
         self.node_width = 20
         self.str_format = '{0:<26} {1:^{width}} {2}'
 
