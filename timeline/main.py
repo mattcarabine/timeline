@@ -4,6 +4,7 @@ import argparse
 import datetime
 from glob import iglob
 import io
+import json
 import multiprocessing
 import os
 import re
@@ -23,6 +24,7 @@ import manager
 from utils import extract_nodename, Event
 
 MAX_BUFFER_SIZE = 1048576
+MAX_RESULT_SIZE = 500000
 LOG_MODULES = {'couchbase.log': cblogparser.CBLogParser,
                'ns_server.couchdb.log': couchdb.CouchDBParser,
                'diag.log': diag.DiagParser,
@@ -54,7 +56,20 @@ class Timeline(object):
 
     def to_dict(self):
         self.sort()
-        return {'events': [event.to_dict() for event in self.events]}
+        result = {'events': [event.to_dict() for event in self.events]}
+
+        # Rough guess at the size of the result
+        size_of_result = len(json.dumps(result))
+
+        size_deficit = size_of_result - MAX_RESULT_SIZE
+
+        while size_deficit > 0:
+            # Calculate amount removed (with 1 added for the comma)
+            size_of_event = len(json.dumps(result['events'][0])) + 1
+            del result['events'][0]
+            size_deficit -= size_of_event
+
+        return result
 
     def to_html(self):
         import ansiconv
