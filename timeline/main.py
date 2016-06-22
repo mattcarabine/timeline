@@ -53,6 +53,7 @@ class Timeline(object):
         self.events = list(sorted(set(self.events)))
 
     def to_dict(self):
+        self.sort()
         return {'events': [event.to_dict() for event in self.events]}
 
     def to_html(self):
